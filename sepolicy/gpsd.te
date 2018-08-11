@@ -1,0 +1,27 @@
+# gpsd - GPS daemon
+type gpsd, domain;
+type gpsd_exec, exec_type, file_type;
+
+init_daemon_domain(gpsd)
+net_domain(gpsd)
+
+# Allow to excess /data/gps
+allow gpsd gps_data_file:fifo_file create_file_perms;
+allow gpsd gps_data_file:file rw_file_perms;
+allow gpsd gps_data_file:dir w_dir_perms;
+
+# Allow exec shell scripts
+allow gpsd shell_exec:file rx_file_perms;
+allow gpsd vendor_file:file { execute_no_trans };
+
+# Work with ttyHS1
+allow gpsd gps_device:chr_file rw_file_perms;
+allow gpsd sysfs:file rw_file_perms;
+
+###
+### neverallow
+###
+
+# gpsd can never have capabilities other than block_suspend
+neverallow gpsd self:capability *;
+neverallow gpsd self:capability2 ~block_suspend;
