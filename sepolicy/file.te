@@ -1,3 +1,4 @@
+# Sysfs types
 type sysfs_devices_tegradc, fs_type, sysfs_type;
 type sysfs_modules_tegrafuse, fs_type, sysfs_type;
 type sysfs_devices_nvavp, fs_type, sysfs_type;
@@ -5,3 +6,6 @@ ifelse(android_api_n_or_later,  `true', `
   type debugfs_pmqos, fs_type, debugfs_type;'
 , `
   type debugfs_pmqos, fs_type, sysfs_type;')
+
+# Data file types
+type gps_data_file, file_type, data_file_type;
