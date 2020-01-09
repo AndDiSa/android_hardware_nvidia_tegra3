@@ -22,7 +22,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)/hw
 LOCAL_SHARED_LIBRARIES := liblog libcutils libutils libdl
 LOCAL_SRC_FILES := tegra3_power.cpp nvpowerhal.cpp powerhal_utils.cpp timeoutpoker.cpp
-LOCAL_MODULE := power.grouper
+LOCAL_MODULE := power.tegra3
 LOCAL_MODULE_TAGS := optional
 
 ifeq ($(shell test $(PLATFORM_SDK_VERSION) -ge 20 || echo 1),)
