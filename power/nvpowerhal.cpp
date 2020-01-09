@@ -184,7 +184,9 @@ void common_power_open(struct powerhal_info *pInfo)
     // Set the interaction timeout to be slightly shorter than the duration of
     // the interaction boost so that we can maintain is constantly during
     // interaction.
-    pInfo->hint_interval[POWER_HINT_INTERACTION] = 90000;
+    pInfo->hint_interval[POWER_HINT_VSYNC] = 100000;
+    pInfo->hint_interval[POWER_HINT_INTERACTION] = 100000;
+    pInfo->hint_interval[POWER_HINT_LAUNCH] = 2000000;
 
     free(buf);
 }
@@ -192,6 +194,7 @@ void common_power_open(struct powerhal_info *pInfo)
 void common_power_init(__attribute__ ((unused)) struct power_module *module,
         struct powerhal_info *pInfo)
 {
+    ALOGI("common_power_open ... ");
     common_power_open(pInfo);
 
     pInfo->ftrace_enable = get_property_bool("nvidia.hwc.ftrace_enable", false);
@@ -212,18 +215,17 @@ void common_power_set_interactive(__attribute__ ((unused)) struct power_module *
     char path[80];
     const char* state = (0 == on)?"0":"1";
     const char* lp_state = (on)?"1":"0";
-    const char* gov = (on == 0)?"conservative":"interactive";
+    const char* gov = (on == 0)?"intelliactive":"intelliactive";
 
+    ALOGI("common_power_open_set_interactive ... ");
     sysfs_write("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", gov);
     ALOGI("Setting scaling_governor to %s", gov);
 
-    sysfs_write("/sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp", lp_state);
-    ALOGI("Setting low power cluster %s", lp_state);
-
-    sysfs_write("/sys/devices/platform/host1x/nvavp/boost_sclk", state);
-    ALOGI("Setting boost_sclk %s", state);
+//    sysfs_write("/sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp", lp_state);
+//    ALOGI("Setting low power cluster %s", lp_state);
 
     if (0 != pInfo) {
+        ALOGI("pInfo available ... ");
         for (i = 0; i < pInfo->input_cnt; i++) {
             if (0 == pInfo->input_devs)
                 dev_id = i;
@@ -242,25 +244,19 @@ void common_power_set_interactive(__attribute__ ((unused)) struct power_module *
         }
     }
 
-    if ( on == 0 ) {
-        const char* display_mode = "/sys/devices/virtual/switch/tegradc.0/state";
-        char mode[9] = "";
-
-        memset(mode, 0, 9);
-        usleep(4000); // Sleep a bit for the filepaths to change and permissions to be set
-        sysfs_read(display_mode, mode, 9);
-        ALOGD("Display mode is currently %s", mode);
-        if ( strncmp(mode,"offline",7) == 0 ) {
-            ALOGI("Screen is off, setting relaxed values for conservative governor");
-            sysfs_write_int("/sys/devices/system/cpu/cpufreq/conservative/up_threshold", 95);
-            sysfs_write_int("/sys/devices/system/cpu/cpufreq/conservative/down_threshold", 50);
-            sysfs_write_int("/sys/devices/system/cpu/cpufreq/conservative/freq_step", 3);
-        } else {
-            ALOGI("Screen is on, setting aggressive values for conservative governor");
-            sysfs_write_int("/sys/devices/system/cpu/cpufreq/conservative/up_threshold", 60);
-            sysfs_write_int("/sys/devices/system/cpu/cpufreq/conservative/down_threshold", 30);
-            sysfs_write_int("/sys/devices/system/cpu/cpufreq/conservative/freq_step", 15);
-        }
+    if ( on != 0 ) {
+        ALOGI("Screen is off going to be switched on, setting aggressive values for intelliactive governor and boost wake up");
+        sysfs_write_int("/sys/devices/system/cpu/cpufreq/intelliactive/io_is_busy", 1);
+        sysfs_write_int("/sys/devices/system/cpu/cpufreq/intelliactive/boostpulse", 1);
+        if (0 != pInfo) {
+            ALOGI("dealing with wake up -> boosting CPU for 5s");
+            pInfo->mTimeoutPoker->requestPmQosTimed("/dev/cpu_freq_min",
+                                                     pInfo->max_frequency,
+                                                     s2ns(10));
+            pInfo->mTimeoutPoker->requestPmQosTimed("/dev/min_online_cpus",
+                                                     DEFAULT_MAX_ONLINE_CPUS,
+                                                     s2ns(10));
+       }
     }
 
 }
@@ -278,20 +274,32 @@ void common_power_hint(__attribute__ ((unused)) struct power_module *module,
 
     switch (hint) {
     case POWER_HINT_VSYNC:
+        ALOGI("dealing with POWER_HINT_VSYNC -> boosting CPU for 100ms");
+        if (data) {
+            pInfo->mTimeoutPoker->requestPmQosTimed("/dev/cpu_freq_min",
+                                                     pInfo->lp_max_frequency,
+                                                     ms2ns(100));
+        }
         break;
     case POWER_HINT_INTERACTION:
-        if (pInfo->ftrace_enable) {
-            sysfs_write("/sys/kernel/debug/tracing/trace_marker", "Start POWER_HINT_INTERACTION\n");
-        }
+        ALOGI("dealing with POWER_HINT_INTERACTION -> boosting CPU for 100ms");
         // Stutters observed during transition animations at lower frequencies
         pInfo->mTimeoutPoker->requestPmQosTimed("/dev/cpu_freq_min",
                                                  pInfo->max_frequency,
-                                                 ms2ns(2000));
-        // Keeps a minimum of 2 cores online for 2s
+                                                 ms2ns(100));
         pInfo->mTimeoutPoker->requestPmQosTimed("/dev/min_online_cpus",
                                                  DEFAULT_MIN_ONLINE_CPUS,
-                                                 ms2ns(2000));
+                                                 ms2ns(100));
         break;
+    case POWER_HINT_LAUNCH:
+        ALOGI("dealing with POWER_HINT_LAUNCH -> boosting CPU for 2 seconds");
+        pInfo->mTimeoutPoker->requestPmQosTimed("/dev/cpu_freq_min",
+                                                 pInfo->max_frequency,
+                                                 s2ns(2));
+        pInfo->mTimeoutPoker->requestPmQosTimed("/dev/min_online_cpus",
+                                                 DEFAULT_MAX_ONLINE_CPUS,
+                                                 s2ns(2));
+	break;
 #ifdef ANDROID_API_LP_OR_LATER
 	case POWER_HINT_LOW_POWER:
 		break;
