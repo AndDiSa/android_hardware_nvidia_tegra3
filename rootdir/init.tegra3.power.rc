@@ -1,72 +1,135 @@
-on boot
-    # Power management settings
+# power
     chown system system /sys/kernel/tegra_cap/core_cap_level
     chown system system /sys/kernel/tegra_cap/core_cap_state
     chown system system /sys/module/cpu_tegra/parameters/cpu_user_cap
-    chown system system /sys/devices/system/cpu/cpufreq/cpuload/enable
-    chown system system /sys/devices/system/cpu/cpuquiet/current_governor
+    chown system system /sys/kernel/cluster/active
+
     # Setting the cpuquiet governor resets the sysfs permissions, so we set it here
     write /sys/devices/system/cpu/cpuquiet/current_governor balanced
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp 0
     write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/enable 1
-    write /sys/module/cpuidle_t3/parameters/lp2_0_in_idle 0
-    restorecon_recursive /sys/devices/system/cpu/cpuquiet/balanced
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_bottom_freq 102000
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_top_freq 620000
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/down_delay 60
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/up_delay 60
+    write /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/mp_overhead 20
+    write /sys/module/cpuidle/parameters/lp2_in_idle 0
+    write /sys/devices/system/cpu/cpuquiet/balanced/idle_bottom_freq 102000
+    write /sys/devices/system/cpu/cpuquiet/balanced/idle_top_freq 620000
+    write /sys/devices/system/cpu/cpuquiet/balanced/down_delay 60
+    write /sys/devices/system/cpu/cpuquiet/balanced/up_delay 60
+
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/down_delay
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/up_delay
     chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/enable
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_bottom_freq
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_top_freq
+    chown system system /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/mp_overhead
+    chown system system /sys/devices/system/cpu/cpuquiet/current_governor
+    chown system system /sys/devices/system/cpu/cpuquiet/balanced/idle_bottom_freq
+    chown system system /sys/devices/system/cpu/cpuquiet/balanced/idle_top_freq
+    chown system system /sys/devices/system/cpu/cpuquiet/balanced/down_delay
+    chown system system /sys/devices/system/cpu/cpuquiet/balanced/up_delay
     chown system system /sys/devices/platform/host1x/nvavp/boost_sclk
     chown system system /sys/devices/tegradc.0/enable
-    chown system system /sys/devices/tegradc.1/enable
+    chown system system /sys/devices/host1x/gr3d/enable_3d_scaling
+
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/down_delay
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/up_delay
     chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/enable
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_bottom_freq
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/idle_top_freq
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/mp_overhead
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/no_lp
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/current_governor
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/balanced/idle_bottom_freq
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/balanced/idle_top_freq
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/balanced/down_delay
+    chmod 0660 /sys/devices/system/cpu/cpuquiet/balanced/up_delay
     chmod 0660 /sys/devices/platform/host1x/nvavp/boost_sclk
     chmod 0660 /sys/devices/tegradc.0/enable
-    chmod 0660 /sys/devices/tegradc.1/enable
+    chmod 0660 /sys/devices/host1x/gr3d/enable_3d_scaling
+    chmod 0660 /sys/kernel/cluster/active
 
-    chown system system /dev/cpu_freq_min
-    chown system system /dev/cpu_freq_max
-    chown system system /dev/min_online_cpus
-    chown system system /dev/max_online_cpus
-    chmod 0660 /dev/cpu_freq_min
-    chmod 0660 /dev/cpu_freq_max
-    chmod 0660 /dev/min_online_cpus
-    chmod 0660 /dev/max_online_cpus
+    # Intelliactive governor settings
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor intelliactive
+    write /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor intelliactive
+    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor intelliactive
+    write /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor intelliactive
+    write /sys/devices/system/cpu/cpufreq/intelliactive/above_hispeed_delay 40000
+    write /sys/devices/system/cpu/cpufreq/intelliactive/boost 0
+    write /sys/devices/system/cpu/cpufreq/intelliactive/boostpulse 1
+    write /sys/devices/system/cpu/cpufreq/intelliactive/boostpulse_duration 80000
+    write /sys/devices/system/cpu/cpufreq/intelliactive/go_hispeed_load 95
+    write /sys/devices/system/cpu/cpufreq/intelliactive/hispeed_freq 860000
+    write /sys/devices/system/cpu/cpufreq/intelliactive/io_is_busy 1
+    write /sys/devices/system/cpu/cpufreq/intelliactive/min_sample_time 20000
+    write /sys/devices/system/cpu/cpufreq/intelliactive/sampling_down_factor 20000
+    write /sys/devices/system/cpu/cpufreq/intelliactive/sync_freq 370000
+    write /sys/devices/system/cpu/cpufreq/intelliactive/target_loads 90
+    write /sys/devices/system/cpu/cpufreq/intelliactive/timer_rate 10000
+    write /sys/devices/system/cpu/cpufreq/intelliactive/timer_slack 40000
+    write /sys/devices/system/cpu/cpufreq/intelliactive/up_threshold_any_cpu_freq 860000
+    write /sys/devices/system/cpu/cpufreq/intelliactive/up_threshold_any_cpu_load 85
+    write /sys/devices/system/cpu/cpufreq/intelliactive/two_phase_freq 370000,513000,620000,860000
 
-    # Throughput hinting is designed to save power by slowing down the gpu
-    # if it is beating the desired frame.  Without hinting, the gpu frequency
-    # scaler operates just by watching the load.
-    # When enabled, throughput hinting is only used if there is only one "app"
-    # running, which is counted by the number of egl contexts that are
-    # bound to window surfaces.  However, the current implementation flipflops
-    # the app count when an app is animating content on two window surfaces
-    # simulataneously.  This amounts to many alternating calls to eglMakeCurrent
-    # on one context and two different surfaces.  When the app count flip flops
-    # we get inconsistent provision of hints, and this prevents the gpu frequency
-    # from scaling up as it should.
-    # Until this is fixed, throughput hinting is universally disabled here.
-    # Note that most of the time on Molly the hinting was unused anyway
-    # since the live wallpaper keeps its context alive even while
-    # invisible so the app count is always >= 2.
-    # In order to use the hinting we'll need to have the wallpaper tear down
-    # down its context appropriately.
-    write /d/scaling/use_throughput_hint 0
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
+    chown system system /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+    chown system system /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+    chown system system /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/above_hispeed_delay
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/boost
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/boostpulse
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/boostpulse_duration
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/go_hispeed_load
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/hispeed_freq
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/io_is_busy
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/min_sample_time
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/sampling_down_factor
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/sync_freq
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/target_loads
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/timer_rate
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/timer_slack
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/up_threshold_any_cpu_freq
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/up_threshold_any_cpu_load
+    chown system system /sys/devices/system/cpu/cpufreq/intelliactive/two_phase_freq
 
-    # Conservative governor settings
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor conservative
-    write /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor conservative
-    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor conservative
-    write /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor conservative
-    write /sys/devices/system/cpu/cpufreq/conservative/up_threshold 95
-    write /sys/devices/system/cpu/cpufreq/conservative/down_threshold 50
-    write /sys/devices/system/cpu/cpufreq/conservative/freq_step 3
-    restorecon_recursive /sys/devices/system/cpu/cpufreq/conservative
-
-    # Interactive governor settings
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
-    write /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor interactive
-    write /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor interactive
-    write /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor interactive
-    write /sys/devices/system/cpu/cpufreq/interactive/boost_factor 2
-    write /sys/devices/system/cpu/cpufreq/interactive/sustain_load 80
-    chown system system /sys/devices/system/cpu/cpufreq/interactive/go_maxspeed_load
-    chown system system /sys/devices/system/cpu/cpufreq/interactive/max_boost
-    restorecon_recursive /sys/devices/system/cpu/cpufreq/interactive
-
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chmod 0660 /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
+    chmod 0660 /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+    chmod 0660 /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+    chmod 0660 /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+    chmod 0660 /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+    chmod 0660 /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/above_hispeed_delay
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/boost
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/boostpulse
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/boostpulse_duration
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/go_hispeed_load
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/hispeed_freq
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/io_is_busy
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/min_sample_time
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/sampling_down_factor
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/sync_freq
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/target_loads
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/timer_rate
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/timer_slack
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/up_threshold_any_cpu_freq
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/up_threshold_any_cpu_load
+    chmod 0660 /sys/devices/system/cpu/cpufreq/intelliactive/two_phase_freq
+    restorecon_recursive /sys/devices/system/cpu/cpufreq/intelliactive
