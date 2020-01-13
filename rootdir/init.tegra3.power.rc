@@ -1,4 +1,5 @@
-# power
+on boot
+      # power
     chown system system /sys/kernel/tegra_cap/core_cap_level
     chown system system /sys/kernel/tegra_cap/core_cap_state
     chown system system /sys/module/cpu_tegra/parameters/cpu_user_cap
