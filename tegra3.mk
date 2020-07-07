@@ -60,7 +60,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	sys.max_texture_size=2048 \
 	persist.media.treble_omx=false
 
-$(call inherit-product-if-exists, vendor/nvidia/tegra3/nvidia-vendor.mk)
+$(call inherit-product, vendor/nvidia/tegra3/nvidia-vendor.mk)
 
 ifeq ($(shell test $(PLATFORM_SDK_VERSION) -ge 20 || echo 1),)
 $(call inherit-product-if-exists, vendor/widevine/arm-generic/widevine-vendor.mk)
