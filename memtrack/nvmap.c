@@ -92,5 +92,8 @@ int nvmap_memtrack_get_memory(pid_t pid, enum memtrack_type type,
 
     fclose(fp);
 
+    if (type == 0) {
+       return 0;
+    }
     return 0;
 }
