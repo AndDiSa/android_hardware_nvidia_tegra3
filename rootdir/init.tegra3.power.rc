@@ -3,7 +3,12 @@ on boot
     chown system system /sys/kernel/tegra_cap/core_cap_level
     chown system system /sys/kernel/tegra_cap/core_cap_state
     chown system system /sys/module/cpu_tegra/parameters/cpu_user_cap
+    chown system system /sys/devices/system/cpu/cpufreq/cpuload/enable
+    chown system system /sys/devices/system/cpu/cpuquiet/current_governor
     chown system system /sys/kernel/cluster/active
+
+    write /sys/module/cpuidle_t3/parameters/lp2_0_in_idle 0
+    restorecon_recursive /sys/devices/system/cpu/cpuquiet/balanced
 
     # Setting the cpuquiet governor resets the sysfs permissions, so we set it here
     write /sys/devices/system/cpu/cpuquiet/current_governor balanced
